@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Treino · Corrida, Core & Força</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --card-border: #e2e8f0;
+    --text: #0f172a;
+    --text-dim: #475569;
+    --text-faint: #94a3b8;
+    
+    /* Cores Estratégicas */
+    --blue: #0056b3; 
+    --success: #28a745; 
+    --danger: #dc3545; 
+    
+    --radius: 16px;
+  }
+  
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+  
+  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; margin: 0; color: var(--text); }
+  button { font-family: inherit; cursor: pointer; border: none; transition: 0.2s; }
+  button:active { transform: scale(0.98); }
+  input, select { font-family: inherit; }
+  .hidden { display: none !important; }
+
+  /* ---------- Menu Fixo Superior Responsivo ---------- */
+  .top-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 60px;
+    background: var(--card);
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+  .nav-tabs-container {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1; /* Ocupa o espaço disponível sem empurrar a engrenagem para fora */
+  }
+  .nav-tabs-container::-webkit-scrollbar { display: none; }
+  
+  .nav-btn {
+    background: transparent; color: var(--text-dim);
+    font-weight: 600; font-size: 14px;
+    padding: 8px 12px; border-radius: 8px;
+    white-space: nowrap;
+  }
+  .nav-btn.active { color: var(--blue); background: rgba(0, 86, 179, 0.1); }
+  
+  .btn-icon {
+    background: var(--card-border);
+    color: var(--text);
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-left: 10px; flex-shrink: 0;
+  }
+
+  /* ---------- Container Principal ---------- */
+  #mainContainer {
+    width: 100%; max-width: 480px; margin: 60px auto 0;
+    min-height: calc(100vh - 60px);
+    background: var(--card);
+    border-left: 1px solid var(--card-border);
+    border-right: 1px solid var(--card-border);
+    position: relative; display: flex; flex-direction: column;
+  }
+
+  .view { padding: 24px; flex: 1; display: none; }
+  .view.active { display: flex; flex-direction: column; }
+
+  /* ---------- Telas Base ---------- */
+  .section-title { font-size: 20px; color: var(--blue); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--card-border); }
+  .input-group { margin-bottom: 16px; }
+  .input-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-dim); margin-bottom: 6px; }
+  .input-group input, .input-group select {
+    width: 100%; padding: 12px; border: 1px solid var(--card-border);
+    border-radius: 8px; font-size: 14px; background: var(--bg);
+  }
+  .result-box {
+    background: rgba(0, 86, 179, 0.05); border-left: 4px solid var(--blue);
+    padding: 12px; margin-top: 8px; font-size: 13px; border-radius: 0 8px 8px 0;
+  }
+  .result-box strong { color: var(--blue); font-size: 16px; display: block; margin-top: 4px; }
+
+  .btn-primary { width: 100%; padding: 14px; border-radius: 12px; background: var(--blue); color: #fff; font-weight: 600; font-size: 15px; margin-top: 10px; }
+  .btn-success { background: var(--success) !important; color: white !important; }
+
+  .workout-list { list-style: none; padding: 0; margin-top: 20px; }
+  .workout-list li { background: var(--bg); border: 1px solid var(--card-border); padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .workout-list li div { font-size: 14px; font-weight: 500; }
+  .workout-list li span { font-size: 12px; color: var(--text-dim); }
+  .del-btn { background: var(--danger); color: white; border-radius: 6px; padding: 4px 8px; font-size: 12px; }
+
+  /* ---------- Tela de Treino ---------- */
+  .eyebrow { font-size: 11px; letter-spacing: 0.1em; color: var(--blue); font-weight: 700; text-transform: uppercase; display: block; }
+  #appHeader { margin-bottom: 20px; }
+  #appHeader h1 { font-size: 24px; font-weight: 700; color: var(--text); }
+  .header-sub { color: var(--text-dim); font-size: 12px; margin-top: 4px; }
+  
+  #daytabs { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 5px; scrollbar-width: none; }
+  #daytabs::-webkit-scrollbar { display: none; }
+  .daytab { flex: 1 0 auto; padding: 8px 12px; border-radius: 8px; background: var(--bg); border: 1px solid var(--card-border); color: var(--text-dim); font-size: 12px; font-weight: 600; }
+  .daytab.active { background: var(--text); color: var(--card); border-color: var(--text); }
+  
+  .session-card { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border-top: 4px solid var(--text); }
+  .session-card.manha { border-top-color: var(--blue); }
+  .session-card.noite { border-top-color: var(--text-dim); }
+  
+  .badge { font-size: 11.5px; font-weight: 600; color: var(--text-dim); display: block; margin-bottom: 4px; }
+  .session-card h3 { font-size: 17px; margin-top: 4px; }
+  .session-meta { font-size: 12px; color: var(--text-faint); margin: 3px 0 12px; }
+  .mini-list { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .mini-list li { display: flex; align-items: center; justify-content: space-between; font-size: 13px; border-bottom: 1px dashed var(--card-border); padding-bottom: 6px; }
+  .mi-icon { margin-right: 8px; font-size: 14px; }
+  .mi-dur { font-variant-numeric: tabular-nums; color: var(--text-faint); font-size: 12px; }
+  
+  .btn-start { width: 100%; padding: 12px; border-radius: 10px; background: var(--success); color: white; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; margin-top: 10px; }
+
+  /* Cronômetro */
+  #timerView { text-align: center; }
+  .timer-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .overall-bar { height: 4px; background: var(--card-border); border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
+  .overall-bar-fg { height: 100%; width: 0%; background: var(--blue); transition: width 0.25s linear; }
+  .ring-wrap { position: relative; width: 240px; height: 240px; margin: 0 auto 20px; }
+  .ring-bg { fill: none; stroke: var(--card-border); stroke-width: 12; }
+  .ring-fg { fill: none; stroke: var(--success); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 0.2s linear, stroke 0.3s; transform: rotate(-90deg); transform-origin: 50% 50%; }
+  #bigTime { font-size: 56px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+  
+  .stat-row { display: flex; gap: 12px; margin-bottom: 12px; }
+  .stat { flex: 1; background: var(--bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px; }
+  .stat-label { font-size: 10px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; display: block; margin-bottom: 4px; }
+  .stat-value { font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  
+  .timer-controls { display: flex; gap: 10px; margin-top: 20px; }
+  .ctrl { flex: 1; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 14px; }
+  .ctrl-skip { background: var(--bg); color: var(--text-dim); border: 1px solid var(--card-border); }
+  .ctrl-pause { background: var(--text); color: var(--card); }
+  .ctrl-stop { background: var(--danger); color: white; }
+
+  /* ---------- Modal de Ajustes ---------- */
+  .modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: flex; align-items: flex-end; justify-content: center; z-index: 200;
+    backdrop-filter: blur(2px);
+  }
+  @media (min-width: 480px){ .modal { align-items: center; } }
+  .modal-card {
+    width: 100%; max-width: 480px; background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 22px 22px 0 0; padding: 24px; box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+  }
+  @media (min-width: 480px){ .modal-card { border-radius: 22px; } }
+  
+  .modal-row { margin-bottom: 16px; }
+  .modal-row label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; }
+  .modal-row label span { color: var(--text); font-weight: 700; }
+  input[type=range] { width: 100%; accent-color: var(--blue); }
+  .modal-note { font-size: 11.5px; color: var(--text-faint); line-height: 1.5; margin-bottom: 20px; }
+  .modal-card { max-height: 88vh; overflow-y: auto; }
+
+  /* ---------- Montar Treino (Builder) ---------- */
+  .session-card.custom { border-top-color: #8b5cf6; }
+  .session-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 10px; }
+  .session-card-header .badge { margin-bottom: 0; }
+  .session-card-header .actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .edit-btn { background: var(--blue); color: white; border-radius: 6px; padding: 4px 8px; font-size: 12px; }
+  .add-item-btn { width: 100%; padding: 10px; border-radius: 8px; background: var(--bg); border: 1px dashed var(--card-border); color: var(--text-dim); font-weight: 600; font-size: 13px; margin-top: 4px; }
+  .add-session-btn { width: 100%; padding: 12px; border-radius: 10px; background: var(--bg); border: 2px dashed var(--blue); color: var(--blue); font-weight: 700; font-size: 14px; margin-top: 6px; }
+  .workout-list li { align-items: flex-start; }
+  .workout-list li div:first-child { flex: 1; }
+  .input-group.inline { display: flex; align-items: center; gap: 8px; }
+  .input-group.inline input[type=checkbox] { width: auto; }
+  .input-group.inline label { margin: 0; }
+
+  /* ---------- Calculadora de IMC / Composição Corporal ---------- */
+  .calc-card { background: var(--bg); padding: 16px; border-radius: 12px; border: 1px solid var(--card-border); margin-bottom: 20px; }
+  .calc-card h4 { font-size: 15px; color: var(--blue); margin-bottom: 4px; }
+  .calc-card h5 { font-size: 13.5px; color: var(--text); margin: 0 0 8px; }
+  .calc-desc { font-size: 12.5px; color: var(--text-dim); line-height: 1.55; margin: 4px 0 14px; }
+  .calc-divider { border: none; border-top: 1px dashed var(--card-border); margin: 18px 0 14px; }
+
+  .field-label-row { display: flex; align-items: center; gap: 2px; margin-bottom: 6px; }
+  .field-label-row label { margin-bottom: 0 !important; }
+
+  .info-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--card-border); color: var(--text-dim);
+    font-size: 10.5px; font-weight: 700; font-style: italic;
+    cursor: pointer; flex-shrink: 0; user-select: none;
+  }
+  .info-icon:active { transform: scale(0.92); }
+  .info-tip {
+    background: rgba(0, 86, 179, 0.06); border-left: 3px solid var(--blue);
+    padding: 9px 11px; margin: 2px 0 14px; border-radius: 0 8px 8px 0;
+    font-size: 12px; color: var(--text-dim); line-height: 1.55;
+  }
+
+  .imc-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-weight: 700; font-size: 12px; margin-left: 6px; vertical-align: middle;
+    background: var(--card-border); color: var(--text-dim);
+  }
+  .imc-badge.imc-baixo { background: rgba(100,116,139,0.15); color: #475569; }
+  .imc-badge.imc-normal { background: rgba(40,167,69,0.15); color: var(--success); }
+  .imc-badge.imc-sobrepeso { background: rgba(245,158,11,0.18); color: #b45309; }
+  .imc-badge.imc-obeso { background: rgba(220,53,69,0.15); color: var(--danger); }
+
+  .oms-table { margin-top: 10px; }
+  .oms-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 10px; border-radius: 8px; font-size: 12.5px;
+    margin-bottom: 6px; background: var(--card); border: 1.5px solid var(--card-border);
+    color: var(--text-dim); transition: 0.2s;
+  }
+  .oms-row .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:8px; }
+  .oms-row[data-cat="baixo"] .dot { background:#94a3b8; }
+  .oms-row[data-cat="normal"] .dot { background: var(--success); }
+  .oms-row[data-cat="sobrepeso"] .dot { background:#f59e0b; }
+  .oms-row[data-cat="obeso"] .dot { background: var(--danger); }
+  .oms-row.active { font-weight: 700; }
+  .oms-row[data-cat="baixo"].active { background: rgba(100,116,139,0.12); border-color:#64748b; color:#475569; }
+  .oms-row[data-cat="normal"].active { background: rgba(40,167,69,0.12); border-color: var(--success); color: var(--success); }
+  .oms-row[data-cat="sobrepeso"].active { background: rgba(245,158,11,0.14); border-color:#f59e0b; color:#b45309; }
+  .oms-row[data-cat="obeso"].active { background: rgba(220,53,69,0.12); border-color: var(--danger); color: var(--danger); }
+</style>
+</head>
+<body>
+
+<!-- Menu Fixo Superior Responsivo -->
+<nav class="top-nav">
+  <div class="nav-tabs-container">
+    <button class="nav-btn active" onclick="app.switchTab('view-main', this)">Treinos</button>
+    <button class="nav-btn" onclick="app.switchTab('view-calc', this)">Cálculos</button>
+    <button class="nav-btn" onclick="app.switchTab('view-builder', this)">Montar</button>
+  </div>
+  <button class="btn-icon" onclick="app.openSettings()" aria-label="Ajustes">⚙️</button>
+</nav>
+
+<div id="mainContainer">
+  
+  <!-- TELA 1: Principal (Rotina Completa) -->
+  <div id="view-main" class="view active">
+    <div id="dayListWrapper">
+      <header id="appHeader">
+        <span class="eyebrow">Plano Semanal</span>
+        <h1>Cronograma</h1>
+        <div class="header-sub">Corrida, Core & Força</div>
+      </header>
+      <nav id="daytabs"></nav>
+      <main id="dayView"></main>
+    </div>
+
+    <!-- View do Cronômetro -->
+    <section id="timerView" class="hidden">
+      <div class="timer-top">
+        <button id="btnBack" class="nav-btn" style="padding:0; font-size:16px;">← Voltar</button>
+        <div style="font-size:12px; font-weight:600; color:var(--text-dim)">Etapa <span id="segIndex">1</span> de <span id="segTotal">1</span></div>
+        <div style="width:50px"></div>
+      </div>
+      <div class="overall-bar"><div class="overall-bar-fg" id="overallBarFg"></div></div>
+
+      <h2 id="segLabel" style="font-size: 22px; color: var(--blue);">—</h2>
+      <p id="segMeta" style="font-size: 13px; color: var(--text-dim); margin: 5px 0 20px;">&nbsp;</p>
+
+      <div class="ring-wrap">
+        <svg viewBox="0 0 240 240" style="width:100%; height:100%;">
+          <circle class="ring-bg" cx="120" cy="120" r="104"></circle>
+          <circle class="ring-fg" id="ringFg" cx="120" cy="120" r="104" stroke-dasharray="653"></circle>
+        </svg>
+        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;">
+          <span id="bigTime">00:00</span>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat"><span class="stat-label">Faltam na etapa</span><span class="stat-value" id="statRemain" style="color:var(--danger)">00:00</span></div>
+        <div class="stat"><span class="stat-label">Próxima etapa</span><span class="stat-value" id="statNext" style="font-size: 12px; color:var(--blue)">—</span></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><span class="stat-label">Decorrido</span><span class="stat-value" id="statElapsed">00:00</span></div>
+        <div class="stat"><span class="stat-label">Total</span><span class="stat-value" id="statTotal">00:00</span></div>
+      </div>
+
+      <div class="timer-controls">
+        <button class="ctrl ctrl-skip" id="btnSkip">⏭ Pular</button>
+        <button class="ctrl ctrl-pause" id="btnPause">⏸ Pausar</button>
+        <button class="ctrl ctrl-stop" id="btnStop">⏹ Parar</button>
+      </div>
+    </section>
+
+    <!-- View Concluído -->
+    <section id="doneView" class="hidden" style="text-align: center; padding-top: 40px;">
+      <div style="font-size: 60px; margin-bottom: 20px;">🎉</div>
+      <h2 style="color: var(--blue);">Treino concluído!</h2>
+      <p id="doneTime" style="font-weight: bold; margin: 20px 0; color: var(--success); font-size: 18px;"></p>
+      <button class="btn-primary" id="btnDoneBack">Voltar ao Início</button>
+    </section>
+  </div>
+
+  <!-- TELA 2: Calculadoras -->
+  <div id="view-calc" class="view">
+    <h2 class="section-title">IMC & Composição Corporal</h2>
+
+    <!-- 1. IMC -->
+    <div class="calc-card">
+      <div class="field-label-row"><h4 style="margin:0;">1. Cálculo do IMC</h4><span class="info-icon" onclick="app.toggleInfo('infoImc')">i</span></div>
+      <p class="calc-desc">Relação rápida entre peso e altura. Não diferencia músculo de gordura, mas é o indicador mais usado para triagem.</p>
+      <div id="infoImc" class="info-tip hidden">
+        <strong>Fórmula:</strong> IMC = Peso (kg) ÷ Altura² (m)<br><br>
+        <strong>Exemplo prático:</strong> 80 kg e 1,80 m de altura:<br>
+        1) 1,80 × 1,80 = 3,24<br>
+        2) 80 ÷ 3,24 = <strong>24,69</strong>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <div class="input-group" style="flex:1;"><label>Peso (kg)</label><input type="number" id="calcPeso" value="80" oninput="app.calcEngine()"></div>
+        <div class="input-group" style="flex:1;"><label>Altura (cm)</label><input type="number" id="calcAlt" value="175" oninput="app.calcEngine()"></div>
+      </div>
+      <div class="result-box">
+        <div>Seu IMC: <strong id="resImc">--</strong> <span id="resImcBadge" class="imc-badge">--</span></div>
+      </div>
+      <div class="oms-table" id="imcTable">
+        <div class="oms-row" data-cat="baixo"><span><span class="dot"></span>Abaixo de 18,5</span><span>Baixo peso</span></div>
+        <div class="oms-row" data-cat="normal"><span><span class="dot"></span>18,5 a 24,9</span><span>Peso normal</span></div>
+        <div class="oms-row" data-cat="sobrepeso"><span><span class="dot"></span>25 a 29,9</span><span>Sobrepeso</span></div>
+        <div class="oms-row" data-cat="obeso"><span><span class="dot"></span>Acima de 30</span><span>Obesidade</span></div>
+      </div>
+    </div>
+
+    <!-- 2. Medidas corporais -->
+    <div class="calc-card">
+      <h4>2. Medidas e Perímetros Corporais</h4>
+      <p class="calc-desc">Úteis para avaliar hipertrofia e distribuição de gordura. Não existe uma fórmula única que junte todas — cada circunferência é acompanhada individualmente ao longo do tempo.</p>
+
+      <div class="input-group">
+        <div class="field-label-row"><label>Braço (cm)</label><span class="info-icon" onclick="app.toggleInfo('infoBraco')">i</span></div>
+        <input type="number" id="calcBraco" placeholder="Ex: 35" oninput="app.calcEngine()">
+        <div id="infoBraco" class="info-tip hidden">Meça o ponto médio do braço <strong>contraído</strong> (bíceps flexionado), sempre no mesmo braço, para acompanhar o ganho de massa magra.</div>
+      </div>
+
+      <div class="input-group">
+        <div class="field-label-row"><label>Peito / Tórax (cm)</label><span class="info-icon" onclick="app.toggleInfo('infoPeito')">i</span></div>
+        <input type="number" id="calcPeito" placeholder="Ex: 100" oninput="app.calcEngine()">
+        <div id="infoPeito" class="info-tip hidden">Passe a fita métrica na altura dos mamilos, respirando normalmente — não infle o peito na hora de medir.</div>
+      </div>
+
+      <div class="input-group">
+        <div class="field-label-row"><label>Quadril (cm)</label><span class="info-icon" onclick="app.toggleInfo('infoQuadril')">i</span></div>
+        <input type="number" id="calcQuadril" placeholder="Ex: 95" oninput="app.calcEngine()">
+        <div id="infoQuadril" class="info-tip hidden">Meça na maior circunferência da região dos glúteos. Este valor também é reaproveitado abaixo na estimativa de gordura corporal (mulheres).</div>
+      </div>
+
+      <div class="input-group">
+        <div class="field-label-row"><label>Coxa (cm)</label><span class="info-icon" onclick="app.toggleInfo('infoCoxa')">i</span></div>
+        <input type="number" id="calcCoxa" placeholder="Ex: 55" oninput="app.calcEngine()">
+        <div id="infoCoxa" class="info-tip hidden">Meça na parte superior da coxa, logo abaixo da dobra do glúteo.</div>
+      </div>
+    </div>
+
+    <!-- 3. Gordura corporal -->
+    <div class="calc-card">
+      <h4>3. Nível de Gordura Corporal (Estimativas)</h4>
+      <p class="calc-desc">Diferente do IMC, o percentual de gordura indica o quanto do seu peso é massa gorda. São estimativas — sem aparelho de bioimpedância, use como referência.</p>
+
+      <div class="field-label-row"><h5 style="margin:0;">A. Índice de Massa Gorda Relativa (RFM)</h5><span class="info-icon" onclick="app.toggleInfo('infoRfm')">i</span></div>
+      <div id="infoRfm" class="info-tip hidden">
+        <strong>Homens:</strong> 64 − (20 × Altura ÷ Cintura)<br>
+        <strong>Mulheres:</strong> 76 − (20 × Altura ÷ Cintura)<br>
+        Usa a Altura informada no cálculo do IMC (item 1).
+      </div>
+      <div style="display:flex; gap:10px;">
+        <div class="input-group" style="flex:1;">
+          <div class="field-label-row"><label>Cintura (cm)</label><span class="info-icon" onclick="app.toggleInfo('infoCintura')">i</span></div>
+          <input type="number" id="calcCintura" placeholder="Ex: 85" oninput="app.calcEngine()">
+        </div>
+        <div class="input-group" style="flex:1;">
+          <label>Sexo</label>
+          <select id="calcSexo" onchange="app.calcEngine()">
+            <option value="M">Masculino</option>
+            <option value="F">Feminino</option>
+          </select>
+        </div>
+      </div>
+      <div id="infoCintura" class="info-tip hidden">Meça na altura do umbigo, com a fita nivelada e sem prender a respiração.</div>
+      <div class="result-box"><div>RFM Estimado: <strong id="resRfm">-- %</strong></div></div>
+
+      <hr class="calc-divider">
+
+      <div class="field-label-row"><h5 style="margin:0;">B. Método da Marinha Americana (Navy Seals)</h5><span class="info-icon" onclick="app.toggleInfo('infoNavy')">i</span></div>
+      <div id="infoNavy" class="info-tip hidden">
+        1. Meça o pescoço (logo abaixo do pomo de Adão).<br>
+        2. Meça a cintura (já informada acima) e, se for mulher, o quadril (informado no item 2).<br>
+        3. Esses valores são combinados com peso, altura e circunferências para estimar o percentual de gordura.
+      </div>
+      <div class="input-group">
+        <div class="field-label-row"><label>Pescoço (cm)</label><span class="info-icon" onclick="app.toggleInfo('infoPescoco')">i</span></div>
+        <input type="number" id="calcPescoco" placeholder="Ex: 38" oninput="app.calcEngine()">
+        <div id="infoPescoco" class="info-tip hidden">Meça logo abaixo do pomo de Adão (laringe), com a fita levemente inclinada para baixo na frente do pescoço.</div>
+      </div>
+      <p id="navyHint" class="calc-desc" style="margin-top:-4px;">Cálculo baseado em Altura, Cintura e Pescoço.</p>
+      <div class="result-box"><div>% de Gordura Estimado: <strong id="resNavy">-- %</strong></div></div>
+
+      <hr class="calc-divider">
+
+      <div class="field-label-row"><h5 style="margin:0;">C. Dobras Cutâneas (Adipômetro)</h5><span class="info-icon" onclick="app.toggleInfo('infoDobras')">i</span></div>
+      <div id="infoDobras" class="info-tip hidden">Método mais preciso com fita e adipômetro (pinça). Usa o protocolo de Jackson & Pollock de 3 dobras: no homem, peito + abdômen + coxa; na mulher, tríceps + suprailíaca + coxa. A soma das dobras, junto com a idade, estima a densidade corporal e, por ela, o percentual de gordura (equação de Siri).</div>
+      <p class="calc-desc">Pince cada dobra na vertical (ou diagonal, quando indicado) com o adipômetro, sem incluir músculo — só pele e gordura. Meça sempre do mesmo lado do corpo.</p>
+
+      <div id="jpMaleFields">
+        <div style="display:flex; gap:10px;">
+          <div class="input-group" style="flex:1;">
+            <div class="field-label-row"><label>Dobra do Peito (mm)</label><span class="info-icon" onclick="app.toggleInfo('infoDobraPeito')">i</span></div>
+            <input type="number" id="calcDobraPeito" placeholder="Ex: 12" oninput="app.calcEngine()">
+          </div>
+          <div class="input-group" style="flex:1;">
+            <div class="field-label-row"><label>Dobra do Abdômen (mm)</label><span class="info-icon" onclick="app.toggleInfo('infoDobraAbdomen')">i</span></div>
+            <input type="number" id="calcDobraAbdomen" placeholder="Ex: 15" oninput="app.calcEngine()">
+          </div>
+        </div>
+        <div id="infoDobraPeito" class="info-tip hidden">Dobra diagonal, pinçada entre a linha da axila anterior e o mamilo.</div>
+        <div id="infoDobraAbdomen" class="info-tip hidden">Dobra vertical, pinçada cerca de 2 cm ao lado direito do umbigo.</div>
+      </div>
+
+      <div id="jpFemaleFields" class="hidden">
+        <div style="display:flex; gap:10px;">
+          <div class="input-group" style="flex:1;">
+            <div class="field-label-row"><label>Dobra do Tríceps (mm)</label><span class="info-icon" onclick="app.toggleInfo('infoDobraTriceps')">i</span></div>
+            <input type="number" id="calcDobraTriceps" placeholder="Ex: 14" oninput="app.calcEngine()">
+          </div>
+          <div class="input-group" style="flex:1;">
+            <div class="field-label-row"><label>Dobra Suprailíaca (mm)</label><span class="info-icon" onclick="app.toggleInfo('infoDobraSuprailiaca')">i</span></div>
+            <input type="number" id="calcDobraSuprailiaca" placeholder="Ex: 16" oninput="app.calcEngine()">
+          </div>
+        </div>
+        <div id="infoDobraTriceps" class="info-tip hidden">Dobra vertical, pinçada na parte posterior do braço (tríceps), no ponto médio entre o ombro e o cotovelo, com o braço relaxado.</div>
+        <div id="infoDobraSuprailiaca" class="info-tip hidden">Dobra diagonal, pinçada logo acima da crista ilíaca, na linha imaginária da axila anterior.</div>
+      </div>
+
+      <div class="input-group">
+        <div class="field-label-row"><label>Dobra da Coxa (mm)</label><span class="info-icon" onclick="app.toggleInfo('infoDobraCoxa')">i</span></div>
+        <input type="number" id="calcDobraCoxa" placeholder="Ex: 18" oninput="app.calcEngine()">
+        <div id="infoDobraCoxa" class="info-tip hidden">Dobra vertical, pinçada na parte frontal da coxa, no ponto médio entre o quadril e o joelho.</div>
+      </div>
+
+      <div class="input-group">
+        <div class="field-label-row"><label>Idade</label><span class="info-icon" onclick="app.toggleInfo('infoIdadeJP')">i</span></div>
+        <input type="number" id="calcIdadeJP" placeholder="Ex: 30" oninput="app.calcEngine()">
+        <div id="infoIdadeJP" class="info-tip hidden">A idade entra na fórmula porque a densidade da pele e da gordura subcutânea muda ao longo da vida.</div>
+      </div>
+
+      <div class="result-box">
+        <div>% de Gordura Estimado (Dobras): <strong id="resJP">-- %</strong> <span id="resJPBadge" class="imc-badge">--</span></div>
+      </div>
+      <div class="oms-table" id="jpTable">
+        <div class="oms-row" data-cat="baixo"><span><span class="dot"></span><span id="jpRow0Range">--</span></span><span>Gordura essencial</span></div>
+        <div class="oms-row" data-cat="normal"><span><span class="dot"></span><span id="jpRow1Range">--</span></span><span>Atlético / Fitness</span></div>
+        <div class="oms-row" data-cat="sobrepeso"><span><span class="dot"></span><span id="jpRow2Range">--</span></span><span>Aceitável</span></div>
+        <div class="oms-row" data-cat="obeso"><span><span class="dot"></span><span id="jpRow3Range">--</span></span><span>Alto</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELA 3: Montar Treino -->
+  <div id="view-builder" class="view">
+    <h2 class="section-title">Montar Meu Treino</h2>
+    <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 18px;">Monte cada dia da semana com sessões e exercícios, igual à aba Treinos. Adicione, remova ou altere à vontade — tudo é salvo automaticamente no seu dispositivo.</p>
+
+    <nav id="builderDayTabs" style="display:flex; gap:8px; overflow-x:auto; margin-bottom:16px; padding-bottom:5px; scrollbar-width:none;"></nav>
+
+    <div class="input-group">
+      <label>Subtítulo do dia (ex: "Regenerativo", "Intervalado de Gás")</label>
+      <input type="text" id="dayTipoInput" oninput="app.updateDayTipo()">
+    </div>
+
+    <div id="builderSessions" style="margin-top: 10px;"></div>
+    <button class="add-session-btn" onclick="app.addSession()">+ Nova Sessão</button>
+  </div>
+
+</div>
+
+<!-- Modal de Sessão (criar/editar) -->
+<div id="sessionModal" class="modal hidden">
+  <div class="modal-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+      <h3 id="sessionModalTitle" style="color:var(--blue); font-size: 18px; margin:0;">Nova Sessão</h3>
+      <button onclick="app.closeSessionModal()" style="background:transparent; font-size:20px; font-weight:bold; color:var(--text-dim);">✕</button>
+    </div>
+    <div class="input-group"><label>Nome da sessão</label><input type="text" id="sessionNome" placeholder="Ex: 🌅 Manhã · Corrida & Core"></div>
+    <div class="input-group">
+      <label>Cor / Tema do card</label>
+      <select id="sessionTema">
+        <option value="manha">Manhã (azul)</option>
+        <option value="noite">Noite (cinza)</option>
+        <option value="custom">Outro (roxo)</option>
+      </select>
+    </div>
+    <button class="btn-primary btn-success" onclick="app.saveSessionModal()">Salvar Sessão</button>
+  </div>
+</div>
+
+<!-- Modal de Item (exercício/segmento) -->
+<div id="itemModal" class="modal hidden">
+  <div class="modal-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+      <h3 id="itemModalTitle" style="color:var(--blue); font-size: 18px; margin:0;">Adicionar Item</h3>
+      <button onclick="app.closeItemModal()" style="background:transparent; font-size:20px; font-weight:bold; color:var(--text-dim);">✕</button>
+    </div>
+
+    <div class="input-group">
+      <label>Tipo de item</label>
+      <select id="itemCategoria" onchange="app.updateItemModalFields()">
+        <option value="cardio">Corrida / Caminhada</option>
+        <option value="exercicio">Exercício (força / core)</option>
+      </select>
+    </div>
+    <div class="input-group"><label>Nome</label><input type="text" id="itemNome" placeholder="Ex: Corrida leve"></div>
+
+    <div id="camposCardio">
+      <div class="input-group">
+        <label>Subtipo</label>
+        <select id="itemTipoCardio">
+          <option value="run">Corrida</option>
+          <option value="walk">Caminhada</option>
+        </select>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <div class="input-group" style="flex:1;"><label>Minutos</label><input type="number" id="itemMin" min="0" value="0"></div>
+        <div class="input-group" style="flex:1;"><label>Segundos</label><input type="number" id="itemSeg" min="0" max="59" value="0"></div>
+      </div>
+    </div>
+
+    <div id="camposExercicio">
+      <div class="input-group">
+        <label>Modo</label>
+        <select id="itemModo" onchange="app.updateItemModalFields()">
+          <option value="reps">Repetições</option>
+          <option value="tempo">Tempo (segundos)</option>
+        </select>
+      </div>
+      <div class="input-group"><label id="itemValorLabel">Repetições</label><input type="number" id="itemValor" min="1" value="10"></div>
+      <div class="input-group inline">
+        <input type="checkbox" id="itemUnilateral">
+        <label for="itemUnilateral">Unilateral (cada lado)</label>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <div class="input-group" style="flex:1;"><label>Séries</label><input type="number" id="itemSets" min="1" value="1"></div>
+      <div class="input-group" style="flex:1;"><label>Pausa entre séries (s)</label><input type="number" id="itemDescanso" min="0" value="0"></div>
+    </div>
+    <div class="input-group"><label>Observação (opcional)</label><input type="text" id="itemObs" placeholder="Ex: cada lado, desce 3s e sobe 1s"></div>
+
+    <button class="btn-primary btn-success" onclick="app.saveItemModal()">Salvar Item</button>
+  </div>
+</div>
+
+<!-- Modal de Ajustes e Dados (Engrenagem) -->
+<div id="settingsModal" class="modal hidden">
+  <div class="modal-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+      <h3 style="color:var(--blue); font-size: 18px; margin:0;">Opções e Ajustes</h3>
+      <button onclick="app.closeSettings()" style="background:transparent; font-size:20px; font-weight:bold; color:var(--text-dim);">✕</button>
+    </div>
+    
+    <h4 style="margin-bottom:10px; font-size: 14px;">Backup de Dados</h4>
+    <div style="display:flex; gap:10px; margin-bottom: 24px;">
+      <button class="btn-primary" style="margin-top:0; padding:10px; flex:1;" onclick="app.exportData()">📤 Exportar JSON</button>
+      <button class="btn-primary" style="margin-top:0; padding:10px; flex:1; background:var(--text);" onclick="document.getElementById('importFile').click()">📥 Importar JSON</button>
+      <input type="file" id="importFile" style="display:none" accept=".json" onchange="app.importData(event)">
+    </div>
+
+    <h4 style="margin-bottom:10px; font-size: 14px;">Ajustes do Cronômetro</h4>
+    <div class="modal-row">
+      <label>Ritmo por repetição <span id="secPerRepVal">2.5s</span></label>
+      <input type="range" id="secPerRepRange" min="1.5" max="4" step="0.5" value="2.5" oninput="app.updateSettingsUI()">
+    </div>
+    <div class="modal-row">
+      <label>Descanso entre séries (Core) <span id="restCoreVal">30s</span></label>
+      <input type="range" id="restCoreRange" min="10" max="60" step="5" value="30" oninput="app.updateSettingsUI()">
+    </div>
+    <p class="modal-note">O cronômetro não conta repetições sozinho — ele estima a duração multiplicando as repetições pelo "ritmo por repetição". Ajuste esse valor para o ritmo que você realmente usa.</p>
+    
+    <button class="btn-primary btn-success" style="margin-top:0;" onclick="app.saveSettings()">Salvar Ajustes</button>
+  </div>
+</div>
+
+<script>
+const app = (function(){
+  "use strict";
+
+  // --- 1. LOCAL STORAGE E DADOS GERAIS ---
+  let db = JSON.parse(localStorage.getItem('treinoDbV1')) || {
+    profile: { peso: 80, alt: 175, sexo: 'M' },
+    calcInputs: {
+      braco: '', peito: '', quadril: '', coxa: '', cintura: '', pescoco: '',
+      dobraPeito: '', dobraAbdomen: '', dobraTriceps: '', dobraSuprailiaca: '', dobraCoxa: '', idadeJP: ''
+    },
+    settings: { secPerRep: 2.5, restCore: 30, restFort: 60, fortRounds: 4 },
+    plan: null
+  };
+
+  // Compatibilidade caso o user tenha uma base velha com os campos antigos de cálculo
+  if(!db.calcInputs || 'dist' in db.calcInputs) {
+    db.calcInputs = {
+      braco: '', peito: '', quadril: '', coxa: '', cintura: '', pescoco: '',
+      dobraPeito: '', dobraAbdomen: '', dobraTriceps: '', dobraSuprailiaca: '', dobraCoxa: '', idadeJP: ''
+    };
+  }
+  if(!('dobraPeito' in db.calcInputs)) {
+    Object.assign(db.calcInputs, { dobraPeito: '', dobraAbdomen: '', dobraTriceps: '', dobraSuprailiaca: '', dobraCoxa: '', idadeJP: '' });
+  }
+  if(db.profile && 'idade' in db.profile) delete db.profile.idade;
+
+  // Compatibilidade caso o user tenha uma base velha sem settings salva
+  if(!db.settings) db.settings = { secPerRep: 2.5, restCore: 30, restFort: 60, fortRounds: 4 };
+
+  function saveDb() { localStorage.setItem('treinoDbV1', JSON.stringify(db)); }
+
+  function uid(){ return 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+  // Plano padrão (semente inicial) — o usuário pode editar tudo depois na aba "Montar"
+  function defaultPlan(){
+    const mk = (nome, seconds, kind, sets=1, descanso=0, obs='') =>
+      ({ id: uid(), categoria:'cardio', nome, tipoCardio:kind, valor:seconds, sets, descanso, obs });
+    const mkEx = (nome, modo, valor, sets=1, descanso=0, unilateral=false, obs='') =>
+      ({ id: uid(), categoria:'exercicio', nome, modo, valor, sets, descanso, unilateral, obs });
+    const fortItems = () => [
+      mkEx('Agachamento Livre','reps',15,4,60,false,'desce 3s, sobe 1s'),
+      mkEx('Afundo / Passada Estática','reps',10,4,60,true,'cada perna'),
+      mkEx('Elevação Pélvica','reps',20,4,60,false,'aperta 2s no topo'),
+      mkEx('Panturrilha em Pé','reps',25,4,60,false,'amplitude máxima')
+    ];
+    const noite = () => ({ id: uid(), nome:'🌆 Noite · Fortalecimento de MMII', tema:'noite', items: fortItems() });
+
+    return {
+      seg: { label:'Segunda-feira', short:'SEG', tipo:'Regenerativo', sessions:[
+        { id: uid(), nome:'🌅 Manhã · Corrida & Core', tema:'manha', items:[
+          mk('Aquecimento — caminhada',180,'walk'), mk('Corrida leve',600,'run'), mk('Caminhada rápida',900,'walk'), mk('Volta à calma',180,'walk'),
+          mkEx('Prancha Tradicional','tempo',30,3,30), mkEx('Abdominal Infra','reps',15,3,30)
+        ]}
+      ]},
+      ter: { label:'Terça-feira', short:'TER', tipo:'Intervalado de Gás', sessions:[
+        { id: uid(), nome:'🌅 Manhã · Corrida & Core', tema:'manha', items:[
+          mk('Caminhada',180,'walk'), mk('Corrida acelerada',60,'run',5,120,'Caminhada rápida'), mk('Caminhada',180,'walk'),
+          mkEx('Abdominal Remador','reps',20,3,30), mkEx('Prancha Lateral','tempo',20,3,30,true,'cada lado')
+        ]},
+        noite()
+      ]},
+      qua: { label:'Quarta-feira', short:'QUA', tipo:'Tempo Run / Ritmo', sessions:[
+        { id: uid(), nome:'🌅 Manhã · Corrida & Core', tema:'manha', items:[
+          mk('Aquecimento — caminhada',180,'walk'), mk('Corrida ritmo moderado',720,'run'), mk('Caminhada',720,'walk'), mk('Volta à calma',180,'walk'),
+          mkEx('Abdominal Supra','reps',20,3,30), mkEx('Prancha Tradicional','tempo',30,3,30)
+        ]}
+      ]},
+      qui: { label:'Quinta-feira', short:'QUI', tipo:'Regenerativo', sessions:[
+        { id: uid(), nome:'🌅 Manhã · Corrida & Core', tema:'manha', items:[
+          mk('Aquecimento — caminhada',180,'walk'), mk('Corrida bem leve',600,'run'), mk('Caminhada',900,'walk'), mk('Volta à calma',180,'walk'),
+          mkEx('Abdominal Bicicleta','reps',20,3,30,false,'total'), mkEx('Perdigueiro','reps',12,3,30,false,'alternadas')
+        ]},
+        noite()
+      ]},
+      sex: { label:'Sexta-feira', short:'SEX', tipo:'Progressivo', sessions:[
+        { id: uid(), nome:'🌅 Manhã · Corrida & Core', tema:'manha', items:[
+          mk('Caminhada',300,'walk'), mk('Corrida leve',300,'run'), mk('Corrida moderada',420,'run'), mk('Corrida rápida',120,'run'), mk('Caminhada',300,'walk'),
+          mkEx('Prancha Tradicional','tempo',40,3,30), mkEx('Abdominal Infra','reps',15,3,30)
+        ]}
+      ]},
+      sab: { label:'Sábado', short:'SÁB', tipo:'Volume — "Longuinho"', sessions:[
+        { id: uid(), nome:'🌅 Manhã · Corrida & Core', tema:'manha', items:[
+          mk('Aquecimento — caminhada',180,'walk'), mk('Corrida contínua leve',900,'run'), mk('Caminhada',600,'walk'),
+          mkEx('Abdominal Remador','reps',20,3,30)
+        ]},
+        noite()
+      ]},
+      dom: { label:'Domingo', short:'DOM', tipo:'Recuperação Ativa', sessions:[
+        { id: uid(), nome:'🌅 Manhã · Corrida & Core', tema:'manha', items:[
+          mk('Caminhada firme (sem corrida)',1500,'walk'),
+          mkEx('Prancha Tradicional','tempo',30,2,30)
+        ]}
+      ]}
+    };
+  }
+
+  if(!db.plan) { db.plan = defaultPlan(); saveDb(); }
+
+  // --- 2. NAVEGAÇÃO SPA ---
+  function switchTab(viewId, btnEl) {
+    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    if(btnEl) btnEl.classList.add('active');
+  }
+
+  // --- 3. MODAL DE AJUSTES E IMPORT/EXPORT ---
+  function openSettings() {
+    document.getElementById('secPerRepRange').value = db.settings.secPerRep;
+    document.getElementById('restCoreRange').value = db.settings.restCore;
+    updateSettingsUI();
+    document.getElementById('settingsModal').classList.remove('hidden');
+  }
+  function closeSettings() {
+    document.getElementById('settingsModal').classList.add('hidden');
+  }
+  function updateSettingsUI() {
+    document.getElementById('secPerRepVal').textContent = document.getElementById('secPerRepRange').value + 's';
+    document.getElementById('restCoreVal').textContent = document.getElementById('restCoreRange').value + 's';
+  }
+  function saveSettings() {
+    db.settings.secPerRep = parseFloat(document.getElementById('secPerRepRange').value);
+    db.settings.restCore = parseInt(document.getElementById('restCoreRange').value, 10);
+    saveDb();
+    closeSettings();
+    openDay(openDayKey); // Recarrega os dados do dia se estiver na view
+  }
+
+  function exportData() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+    const dl = document.createElement('a');
+    dl.setAttribute("href", dataStr);
+    dl.setAttribute("download", "meus_treinos_dados.json");
+    document.body.appendChild(dl); dl.click(); dl.remove();
+  }
+  function importData(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      try {
+        db = JSON.parse(evt.target.result); saveDb();
+        alert('Dados importados com sucesso!'); location.reload(); 
+      } catch(err) { alert('Erro ao carregar arquivo.'); }
+    };
+    reader.readAsText(file);
+  }
+
+  // --- 4. CALCULADORAS (IMC & Composição Corporal) ---
+  function initCalcs() {
+    document.getElementById('calcPeso').value = db.profile.peso; document.getElementById('calcAlt').value = db.profile.alt;
+    document.getElementById('calcSexo').value = db.profile.sexo;
+    document.getElementById('calcBraco').value = db.calcInputs.braco; document.getElementById('calcPeito').value = db.calcInputs.peito;
+    document.getElementById('calcQuadril').value = db.calcInputs.quadril; document.getElementById('calcCoxa').value = db.calcInputs.coxa;
+    document.getElementById('calcCintura').value = db.calcInputs.cintura; document.getElementById('calcPescoco').value = db.calcInputs.pescoco;
+    document.getElementById('calcDobraPeito').value = db.calcInputs.dobraPeito; document.getElementById('calcDobraAbdomen').value = db.calcInputs.dobraAbdomen;
+    document.getElementById('calcDobraTriceps').value = db.calcInputs.dobraTriceps; document.getElementById('calcDobraSuprailiaca').value = db.calcInputs.dobraSuprailiaca;
+    document.getElementById('calcDobraCoxa').value = db.calcInputs.dobraCoxa; document.getElementById('calcIdadeJP').value = db.calcInputs.idadeJP;
+    calcEngine();
+  }
+
+  function toggleInfo(id) {
+    document.getElementById(id).classList.toggle('hidden');
+  }
+
+  function classifyImc(imc) {
+    if (imc < 18.5) return { cat: 'baixo', label: 'Baixo peso' };
+    if (imc < 25)   return { cat: 'normal', label: 'Peso normal' };
+    if (imc < 30)   return { cat: 'sobrepeso', label: 'Sobrepeso' };
+    return { cat: 'obeso', label: 'Obesidade' };
+  }
+
+  function classifyBodyFat(bf, sexo) {
+    if (sexo === 'M') {
+      if (bf < 6)  return { cat: 'baixo', label: 'Gordura essencial' };
+      if (bf < 18) return { cat: 'normal', label: 'Atlético / Fitness' };
+      if (bf < 25) return { cat: 'sobrepeso', label: 'Aceitável' };
+      return { cat: 'obeso', label: 'Alto' };
+    }
+    if (bf < 14) return { cat: 'baixo', label: 'Gordura essencial' };
+    if (bf < 25) return { cat: 'normal', label: 'Atlético / Fitness' };
+    if (bf < 32) return { cat: 'sobrepeso', label: 'Aceitável' };
+    return { cat: 'obeso', label: 'Alto' };
+  }
+
+  function calcEngine() {
+    db.profile.peso = parseFloat(document.getElementById('calcPeso').value) || 0;
+    db.profile.alt = parseFloat(document.getElementById('calcAlt').value) || 0;
+    db.profile.sexo = document.getElementById('calcSexo').value;
+    db.calcInputs.braco = parseFloat(document.getElementById('calcBraco').value) || '';
+    db.calcInputs.peito = parseFloat(document.getElementById('calcPeito').value) || '';
+    db.calcInputs.quadril = parseFloat(document.getElementById('calcQuadril').value) || '';
+    db.calcInputs.coxa = parseFloat(document.getElementById('calcCoxa').value) || '';
+    db.calcInputs.cintura = parseFloat(document.getElementById('calcCintura').value) || '';
+    db.calcInputs.pescoco = parseFloat(document.getElementById('calcPescoco').value) || '';
+    db.calcInputs.dobraPeito = parseFloat(document.getElementById('calcDobraPeito').value) || '';
+    db.calcInputs.dobraAbdomen = parseFloat(document.getElementById('calcDobraAbdomen').value) || '';
+    db.calcInputs.dobraTriceps = parseFloat(document.getElementById('calcDobraTriceps').value) || '';
+    db.calcInputs.dobraSuprailiaca = parseFloat(document.getElementById('calcDobraSuprailiaca').value) || '';
+    db.calcInputs.dobraCoxa = parseFloat(document.getElementById('calcDobraCoxa').value) || '';
+    db.calcInputs.idadeJP = parseInt(document.getElementById('calcIdadeJP').value) || '';
+    saveDb();
+
+    const altM = db.profile.alt / 100;
+    const badgeEl = document.getElementById('resImcBadge');
+    const imcRows = document.querySelectorAll('#imcTable .oms-row');
+
+    // 1. IMC
+    if (db.profile.peso > 0 && altM > 0) {
+      const imc = db.profile.peso / (altM * altM);
+      const c = classifyImc(imc);
+      document.getElementById('resImc').textContent = imc.toFixed(2);
+      badgeEl.textContent = c.label;
+      badgeEl.className = 'imc-badge imc-' + c.cat;
+      imcRows.forEach(r => r.classList.toggle('active', r.dataset.cat === c.cat));
+    } else {
+      document.getElementById('resImc').textContent = '--';
+      badgeEl.textContent = '--';
+      badgeEl.className = 'imc-badge';
+      imcRows.forEach(r => r.classList.remove('active'));
+    }
+
+    // 3A. RFM (Índice de Massa Gorda Relativa)
+    const cinturaM = (db.calcInputs.cintura || 0) / 100;
+    const resRfmEl = document.getElementById('resRfm');
+    if (altM > 0 && cinturaM > 0) {
+      const rfm = db.profile.sexo === 'M'
+        ? 64 - (20 * (altM / cinturaM))
+        : 76 - (20 * (altM / cinturaM));
+      resRfmEl.textContent = rfm.toFixed(1) + " %";
+    } else {
+      resRfmEl.textContent = '--';
+    }
+
+    // 3B. Método da Marinha Americana (Navy Seals)
+    const waist = db.calcInputs.cintura || 0;
+    const neck = db.calcInputs.pescoco || 0;
+    const height = db.profile.alt || 0;
+    const hip = db.calcInputs.quadril || 0;
+    const resNavyEl = document.getElementById('resNavy');
+    const navyHint = document.getElementById('navyHint');
+    let navy = null;
+
+    if (db.profile.sexo === 'M') {
+      navyHint.textContent = "Cálculo baseado em Altura, Cintura e Pescoço.";
+      if (waist > 0 && neck > 0 && height > 0 && (waist - neck) > 0) {
+        navy = 495 / (1.0324 - 0.19077 * Math.log10(waist - neck) + 0.15456 * Math.log10(height)) - 450;
+      }
+    } else {
+      navyHint.textContent = "Como o sexo é feminino, o cálculo também usa o Quadril informado no item 2 (Medidas Corporais).";
+      if (waist > 0 && neck > 0 && height > 0 && hip > 0 && (waist + hip - neck) > 0) {
+        navy = 495 / (1.29579 - 0.35004 * Math.log10(waist + hip - neck) + 0.221 * Math.log10(height)) - 450;
+      }
+    }
+    resNavyEl.textContent = (navy !== null && navy > 0 && isFinite(navy)) ? navy.toFixed(1) + " %" : '--';
+
+    // 3C. Dobras Cutâneas — Jackson & Pollock (3 dobras) + equação de Siri
+    const jpMaleFields = document.getElementById('jpMaleFields');
+    const jpFemaleFields = document.getElementById('jpFemaleFields');
+    const idadeJP = db.calcInputs.idadeJP || 0;
+    const dobraCoxa = db.calcInputs.dobraCoxa || 0;
+    let jp = null;
+
+    if (db.profile.sexo === 'M') {
+      jpMaleFields.classList.remove('hidden');
+      jpFemaleFields.classList.add('hidden');
+      document.getElementById('jpRow0Range').textContent = 'Abaixo de 6%';
+      document.getElementById('jpRow1Range').textContent = '6% a 17,9%';
+      document.getElementById('jpRow2Range').textContent = '18% a 24,9%';
+      document.getElementById('jpRow3Range').textContent = 'A partir de 25%';
+
+      const dobraPeito = db.calcInputs.dobraPeito || 0;
+      const dobraAbdomen = db.calcInputs.dobraAbdomen || 0;
+      if (dobraPeito > 0 && dobraAbdomen > 0 && dobraCoxa > 0 && idadeJP > 0) {
+        const soma = dobraPeito + dobraAbdomen + dobraCoxa;
+        const bd = 1.10938 - 0.0008267 * soma + 0.0000016 * soma * soma - 0.0002574 * idadeJP;
+        jp = 495 / bd - 450;
+      }
+    } else {
+      jpMaleFields.classList.add('hidden');
+      jpFemaleFields.classList.remove('hidden');
+      document.getElementById('jpRow0Range').textContent = 'Abaixo de 14%';
+      document.getElementById('jpRow1Range').textContent = '14% a 24,9%';
+      document.getElementById('jpRow2Range').textContent = '25% a 31,9%';
+      document.getElementById('jpRow3Range').textContent = 'A partir de 32%';
+
+      const dobraTriceps = db.calcInputs.dobraTriceps || 0;
+      const dobraSuprailiaca = db.calcInputs.dobraSuprailiaca || 0;
+      if (dobraTriceps > 0 && dobraSuprailiaca > 0 && dobraCoxa > 0 && idadeJP > 0) {
+        const soma = dobraTriceps + dobraSuprailiaca + dobraCoxa;
+        const bd = 1.0994921 - 0.0009929 * soma + 0.0000023 * soma * soma - 0.0001392 * idadeJP;
+        jp = 495 / bd - 450;
+      }
+    }
+
+    const resJPEl = document.getElementById('resJP');
+    const resJPBadgeEl = document.getElementById('resJPBadge');
+    const jpRows = document.querySelectorAll('#jpTable .oms-row');
+    if (jp !== null && isFinite(jp) && jp > 0) {
+      const c = classifyBodyFat(jp, db.profile.sexo);
+      resJPEl.textContent = jp.toFixed(1) + " %";
+      resJPBadgeEl.textContent = c.label;
+      resJPBadgeEl.className = 'imc-badge imc-' + c.cat;
+      jpRows.forEach(r => r.classList.toggle('active', r.dataset.cat === c.cat));
+    } else {
+      resJPEl.textContent = '--';
+      resJPBadgeEl.textContent = '--';
+      resJPBadgeEl.className = 'imc-badge';
+      jpRows.forEach(r => r.classList.remove('active'));
+    }
+  }
+
+  // --- 5. PLANO DE TREINOS (dados usados pela aba Treinos e pelo cronômetro) ---
+  const DAY_KEYS = ['seg','ter','qua','qui','sex','sab','dom'];
+
+  let openDayKey = DAY_KEYS[new Date().getDay() === 0 ? 6 : new Date().getDay()-1];
+  let currentSegments = [], currentIndex = 0, remaining = 0, elapsed = 0, totalDuration = 0;
+  let timerHandle = null, running = false, lastTs = null;
+
+  function formatDuration(sec){
+    const m = Math.floor((sec%3600)/60), s = sec%60;
+    return m > 0 ? (s>0 ? m+'min '+s+'s' : m+' min') : s+'s';
+  }
+
+  function iconFor(item){
+    if(item.categoria === 'cardio') return item.tipoCardio === 'run' ? '🏃' : '🚶';
+    return item.unilateral ? '🧘' : '🏋️';
+  }
+
+  function summaryFor(item){
+    if(item.categoria === 'cardio'){
+      return item.sets > 1 ? `${item.sets}x ${formatDuration(item.valor)}` : formatDuration(item.valor);
+    }
+    const unit = item.modo === 'tempo' ? `${item.valor}s` : `${item.valor} reps`;
+    return `${item.sets}x ${unit}${item.unilateral ? ' (cada lado)' : ''}`;
+  }
+
+  function renderMiniList(session){
+    const html = session.items.map(it =>
+      `<li><span class="mi-icon">${iconFor(it)}</span> <span>${it.nome}</span> <span class="mi-dur">${summaryFor(it)}</span></li>`
+    ).join('');
+    return `<ul class="mini-list">${html || '<li><span style="color:var(--text-faint)">Sem itens.</span></li>'}</ul>`;
+  }
+
+  function temaClass(tema){ return tema === 'manha' ? 'manha' : tema === 'noite' ? 'noite' : 'custom'; }
+
+  function renderDayTabs() {
+    const tabs = document.getElementById('daytabs');
+    tabs.innerHTML = DAY_KEYS.map(k => `<button class="daytab ${k===openDayKey?'active':''}" onclick="app.openDay('${k}')">${db.plan[k].short}</button>`).join('');
+  }
+
+  function openDay(key) {
+    openDayKey = key;
+    renderDayTabs();
+    const day = db.plan[key];
+
+    let html = `
+      <div style="margin-bottom:15px">
+        <span style="font-size:11px; font-weight:700; color:var(--text-dim); text-transform:uppercase;">${day.tipo || ''}</span>
+        <h2 style="font-size:22px; margin-top:2px;">${day.label}</h2>
+      </div>
+    `;
+
+    if(day.sessions.length === 0){
+      html += `<p style="color:var(--text-faint); font-size:13px;">Nenhuma sessão cadastrada para este dia. Use a aba "Montar" para adicionar.</p>`;
+    }
+
+    day.sessions.forEach(session => {
+      html += `
+        <div class="session-card ${temaClass(session.tema)}">
+          <span class="badge">${session.nome}</span>
+          ${renderMiniList(session)}
+          <button class="btn-start" onclick="app.startSession('${key}','${session.id}')">Iniciar ▶</button>
+        </div>
+      `;
+    });
+    document.getElementById('dayView').innerHTML = html;
+  }
+
+  function buildSegmentsForSession(session){
+    const segs = [];
+    session.items.forEach(item => {
+      for(let s=1; s<=item.sets; s++){
+        if(item.categoria === 'cardio'){
+          segs.push({label:item.nome, seconds:item.valor, kind:item.tipoCardio, sub:(item.tipoCardio==='run'?'Corrida':'Caminhada'), meta:item.sets>1?`Série ${s}/${item.sets}`:''});
+        } else {
+          const secPerRep = db.settings.secPerRep;
+          const seconds = item.modo === 'tempo' ? item.valor : Math.round(item.valor * secPerRep);
+          const sub = item.modo === 'tempo' ? `${item.valor}s` : `${item.valor} reps`;
+          if(item.unilateral){
+            segs.push({label:`${item.nome} (Dir.)`, seconds, kind:'core', sub, meta:`Série ${s}/${item.sets}`});
+            segs.push({label:`${item.nome} (Esq.)`, seconds, kind:'core', sub, meta:`Série ${s}/${item.sets}`});
+          } else {
+            segs.push({label:item.nome, seconds, kind:'core', sub, meta:`Série ${s}/${item.sets}`});
+          }
+        }
+        if(s < item.sets && item.descanso > 0){
+          segs.push({label:'Descanso', seconds:item.descanso, kind:'rest', sub:item.obs || 'Prepare-se'});
+        }
+      }
+    });
+    return segs;
+  }
+
+  function startSession(dayKey, sessionId) {
+    const day = db.plan[dayKey];
+    const session = day.sessions.find(s => s.id === sessionId);
+    if(!session || session.items.length === 0){
+      alert('Esta sessão ainda não tem itens. Adicione itens na aba "Montar".');
+      return;
+    }
+    currentSegments = buildSegmentsForSession(session);
+    currentIndex = 0; elapsed = 0;
+    totalDuration = currentSegments.reduce((a, s) => a + s.seconds, 0);
+    remaining = currentSegments[0].seconds;
+
+    document.getElementById('dayListWrapper').classList.add('hidden');
+    document.getElementById('doneView').classList.add('hidden');
+    document.getElementById('timerView').classList.remove('hidden');
+
+    document.getElementById('segTotal').textContent = currentSegments.length;
+    updateSegmentUI();
+    setRunning(true);
+  }
+
+  // --- 6. MONTAR TREINO (BUILDER: dias, sessões e itens) ---
+  let builderOpenDayKey = openDayKey;
+  let itemModalCtx = { sessionId:null, itemId:null };
+  let sessionModalCtx = { dayKey:null, sessionId:null };
+
+  function renderBuilderDayTabs(){
+    const tabs = document.getElementById('builderDayTabs');
+    tabs.innerHTML = DAY_KEYS.map(k => `<button class="daytab ${k===builderOpenDayKey?'active':''}" onclick="app.openBuilderDay('${k}')">${db.plan[k].short}</button>`).join('');
+  }
+
+  function openBuilderDay(key){
+    builderOpenDayKey = key;
+    renderBuilderDayTabs();
+    document.getElementById('dayTipoInput').value = db.plan[key].tipo || '';
+    renderBuilderSessions();
+  }
+
+  function updateDayTipo(){
+    db.plan[builderOpenDayKey].tipo = document.getElementById('dayTipoInput').value;
+    saveDb();
+  }
+
+  function renderBuilderSessions(){
+    const day = db.plan[builderOpenDayKey];
+    const wrap = document.getElementById('builderSessions');
+    if(day.sessions.length === 0){
+      wrap.innerHTML = '<p style="color:var(--text-faint); font-size:13px; margin-bottom:16px;">Nenhuma sessão ainda para este dia. Adicione a primeira abaixo.</p>';
+      return;
+    }
+    wrap.innerHTML = day.sessions.map(session => {
+      const itemsHtml = session.items.map(it => `
+        <li>
+          <div><strong>${iconFor(it)} ${it.nome}</strong><br><span>${summaryFor(it)}</span></div>
+          <div style="display:flex; gap:6px;">
+            <button class="edit-btn" onclick="app.editItem('${session.id}','${it.id}')">✎</button>
+            <button class="del-btn" onclick="app.removeItem('${session.id}','${it.id}')">✕</button>
+          </div>
+        </li>`).join('');
+      return `
+        <div class="session-card ${temaClass(session.tema)}">
+          <div class="session-card-header">
+            <span class="badge">${session.nome}</span>
+            <div class="actions">
+              <button class="edit-btn" onclick="app.editSessionMeta('${session.id}')">✎</button>
+              <button class="del-btn" onclick="app.removeSession('${session.id}')">✕</button>
+            </div>
+          </div>
+          <ul class="workout-list">${itemsHtml || '<li><span style="color:var(--text-faint)">Sem itens ainda.</span></li>'}</ul>
+          <button class="add-item-btn" onclick="app.addItem('${session.id}')">+ Adicionar item</button>
+        </div>`;
+    }).join('');
+  }
+
+  function addSession(){
+    sessionModalCtx = { dayKey: builderOpenDayKey, sessionId: null };
+    document.getElementById('sessionModalTitle').textContent = 'Nova Sessão';
+    document.getElementById('sessionNome').value = '';
+    document.getElementById('sessionTema').value = 'custom';
+    document.getElementById('sessionModal').classList.remove('hidden');
+  }
+
+  function editSessionMeta(sessionId){
+    const day = db.plan[builderOpenDayKey];
+    const session = day.sessions.find(s => s.id === sessionId);
+    sessionModalCtx = { dayKey: builderOpenDayKey, sessionId };
+    document.getElementById('sessionModalTitle').textContent = 'Editar Sessão';
+    document.getElementById('sessionNome').value = session.nome;
+    document.getElementById('sessionTema').value = session.tema;
+    document.getElementById('sessionModal').classList.remove('hidden');
+  }
+
+  function closeSessionModal(){ document.getElementById('sessionModal').classList.add('hidden'); }
+
+  function saveSessionModal(){
+    const nome = document.getElementById('sessionNome').value.trim();
+    if(!nome) return alert('Informe um nome para a sessão.');
+    const tema = document.getElementById('sessionTema').value;
+    const day = db.plan[sessionModalCtx.dayKey];
+    if(sessionModalCtx.sessionId){
+      const session = day.sessions.find(s => s.id === sessionModalCtx.sessionId);
+      session.nome = nome; session.tema = tema;
+    } else {
+      day.sessions.push({ id: uid(), nome, tema, items: [] });
+    }
+    saveDb(); closeSessionModal(); renderBuilderSessions();
+  }
+
+  function removeSession(sessionId){
+    if(!confirm('Remover esta sessão e todos os seus itens?')) return;
+    const day = db.plan[builderOpenDayKey];
+    day.sessions = day.sessions.filter(s => s.id !== sessionId);
+    saveDb(); renderBuilderSessions();
+  }
+
+  function addItem(sessionId){
+    itemModalCtx = { sessionId, itemId: null };
+    document.getElementById('itemModalTitle').textContent = 'Adicionar Item';
+    document.getElementById('itemCategoria').value = 'cardio';
+    document.getElementById('itemNome').value = '';
+    document.getElementById('itemTipoCardio').value = 'run';
+    document.getElementById('itemMin').value = 0;
+    document.getElementById('itemSeg').value = 0;
+    document.getElementById('itemModo').value = 'reps';
+    document.getElementById('itemValor').value = 10;
+    document.getElementById('itemUnilateral').checked = false;
+    document.getElementById('itemSets').value = 1;
+    document.getElementById('itemDescanso').value = 0;
+    document.getElementById('itemObs').value = '';
+    updateItemModalFields();
+    document.getElementById('itemModal').classList.remove('hidden');
+  }
+
+  function editItem(sessionId, itemId){
+    const day = db.plan[builderOpenDayKey];
+    const session = day.sessions.find(s => s.id === sessionId);
+    const item = session.items.find(i => i.id === itemId);
+    itemModalCtx = { sessionId, itemId };
+    document.getElementById('itemModalTitle').textContent = 'Editar Item';
+    document.getElementById('itemCategoria').value = item.categoria;
+    document.getElementById('itemNome').value = item.nome;
+    if(item.categoria === 'cardio'){
+      document.getElementById('itemTipoCardio').value = item.tipoCardio;
+      document.getElementById('itemMin').value = Math.floor(item.valor/60);
+      document.getElementById('itemSeg').value = item.valor%60;
+    } else {
+      document.getElementById('itemModo').value = item.modo;
+      document.getElementById('itemValor').value = item.valor;
+      document.getElementById('itemUnilateral').checked = !!item.unilateral;
+    }
+    document.getElementById('itemSets').value = item.sets;
+    document.getElementById('itemDescanso').value = item.descanso;
+    document.getElementById('itemObs').value = item.obs || '';
+    updateItemModalFields();
+    document.getElementById('itemModal').classList.remove('hidden');
+  }
+
+  function removeItem(sessionId, itemId){
+    if(!confirm('Remover este item?')) return;
+    const day = db.plan[builderOpenDayKey];
+    const session = day.sessions.find(s => s.id === sessionId);
+    session.items = session.items.filter(i => i.id !== itemId);
+    saveDb(); renderBuilderSessions();
+  }
+
+  function closeItemModal(){ document.getElementById('itemModal').classList.add('hidden'); }
+
+  function updateItemModalFields(){
+    const cat = document.getElementById('itemCategoria').value;
+    document.getElementById('camposCardio').classList.toggle('hidden', cat !== 'cardio');
+    document.getElementById('camposExercicio').classList.toggle('hidden', cat !== 'exercicio');
+    if(cat === 'exercicio'){
+      const modo = document.getElementById('itemModo').value;
+      document.getElementById('itemValorLabel').textContent = modo === 'tempo' ? 'Duração (segundos)' : 'Repetições';
+    }
+  }
+
+  function saveItemModal(){
+    const categoria = document.getElementById('itemCategoria').value;
+    const nome = document.getElementById('itemNome').value.trim();
+    if(!nome) return alert('Informe o nome do item.');
+    const sets = Math.max(1, parseInt(document.getElementById('itemSets').value,10) || 1);
+    const descanso = Math.max(0, parseInt(document.getElementById('itemDescanso').value,10) || 0);
+    const obs = document.getElementById('itemObs').value.trim();
+
+    let item;
+    if(categoria === 'cardio'){
+      const min = parseInt(document.getElementById('itemMin').value,10) || 0;
+      const seg = parseInt(document.getElementById('itemSeg').value,10) || 0;
+      const valor = (min*60) + seg;
+      if(valor <= 0) return alert('Informe uma duração válida.');
+      item = { id: itemModalCtx.itemId || uid(), categoria, nome, tipoCardio: document.getElementById('itemTipoCardio').value, valor, sets, descanso, obs };
+    } else {
+      const valor = parseInt(document.getElementById('itemValor').value,10) || 0;
+      if(valor <= 0) return alert('Informe um valor válido.');
+      item = { id: itemModalCtx.itemId || uid(), categoria, nome, modo: document.getElementById('itemModo').value, valor, sets, descanso, unilateral: document.getElementById('itemUnilateral').checked, obs };
+    }
+
+    const day = db.plan[builderOpenDayKey];
+    const session = day.sessions.find(s => s.id === itemModalCtx.sessionId);
+    if(itemModalCtx.itemId){
+      const idx = session.items.findIndex(i => i.id === itemModalCtx.itemId);
+      session.items[idx] = item;
+    } else {
+      session.items.push(item);
+    }
+    saveDb(); closeItemModal(); renderBuilderSessions();
+  }
+
+  function updateSegmentUI() {
+    const seg = currentSegments[currentIndex];
+    document.getElementById('segIndex').textContent = currentIndex + 1;
+    document.getElementById('segLabel').textContent = seg.label;
+    document.getElementById('segMeta').textContent = seg.sub || '';
+    
+    const next = currentSegments[currentIndex+1];
+    document.getElementById('statNext').textContent = next ? next.label : 'Fim 🎉';
+    renderTick();
+  }
+
+  function formatClock(sec) {
+    sec = Math.max(0, Math.ceil(sec));
+    return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0');
+  }
+
+  function renderTick() {
+    const seg = currentSegments[currentIndex];
+    document.getElementById('bigTime').textContent = formatClock(remaining);
+    document.getElementById('statRemain').textContent = formatClock(remaining);
+    document.getElementById('statElapsed').textContent = formatClock(elapsed);
+    document.getElementById('statTotal').textContent = formatClock(totalDuration);
+    
+    const frac = Math.min(1, Math.max(0, remaining/seg.seconds));
+    document.getElementById('ringFg').style.strokeDashoffset = String(653 * frac);
+    document.getElementById('overallBarFg').style.width = (Math.min(100,(elapsed/totalDuration)*100)) + '%';
+  }
+
+  function setRunning(state) {
+    running = state;
+    if(running) {
+      lastTs = Date.now();
+      timerHandle = setInterval(tick, 200);
+      document.getElementById('btnPause').textContent = "⏸ Pausar";
+    } else {
+      clearInterval(timerHandle);
+      document.getElementById('btnPause').textContent = "▶ Retomar";
+    }
+  }
+
+  function tick() {
+    if(!running) return;
+    const now = Date.now();
+    const delta = (now - lastTs)/1000;
+    lastTs = now;
+    remaining -= delta;
+    elapsed += delta;
+    if(remaining <= 0) goNext();
+    renderTick();
+  }
+
+  function goNext() {
+    currentIndex++;
+    if(currentIndex >= currentSegments.length) return finishSession();
+    remaining = currentSegments[currentIndex].seconds;
+    updateSegmentUI();
+  }
+
+  function finishSession() {
+    clearInterval(timerHandle); running = false;
+    document.getElementById('timerView').classList.add('hidden');
+    document.getElementById('doneView').classList.remove('hidden');
+    document.getElementById('doneTime').textContent = 'Tempo total: ' + formatClock(elapsed);
+  }
+
+  // Eventos Timer
+  document.getElementById('btnPause').onclick = () => setRunning(!running);
+  document.getElementById('btnSkip').onclick = () => { elapsed += remaining; goNext(); };
+  document.getElementById('btnStop').onclick = () => finishSession();
+  document.getElementById('btnBack').onclick = () => { 
+    clearInterval(timerHandle); running = false; 
+    document.getElementById('timerView').classList.add('hidden'); 
+    document.getElementById('dayListWrapper').classList.remove('hidden'); 
+  };
+  document.getElementById('btnDoneBack').onclick = () => {
+    document.getElementById('doneView').classList.add('hidden');
+    document.getElementById('dayListWrapper').classList.remove('hidden');
+  };
+
+  // --- INIT GLOBAL ---
+  window.addEventListener('DOMContentLoaded', () => {
+    initCalcs();
+    renderDayTabs();
+    openDay(openDayKey);
+    renderBuilderDayTabs();
+    openBuilderDay(builderOpenDayKey);
+  });
+
+  return {
+    switchTab, exportData, importData, calcEngine, toggleInfo, openDay, startSession,
+    openSettings, closeSettings, updateSettingsUI, saveSettings,
+    openBuilderDay, updateDayTipo,
+    addSession, editSessionMeta, removeSession, saveSessionModal, closeSessionModal,
+    addItem, editItem, removeItem, saveItemModal, closeItemModal, updateItemModalFields
+  };
+
+})();
+</script>
+</body>
+</html>
